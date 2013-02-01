@@ -4,15 +4,14 @@ import sys
 import time
 import pexpect
 from re import compile, DOTALL
+from utilities import create_pexpect_obj 
+from constants import *
 
-CONNECT = 'ssh mcladmin@216.69.72.141'
-PASSWORD = 'xyz123'
+SHOWRUN_RE = compile('#bgp_[0-9](.*)#bgp_[0-9]', DOTALL)
 
-TCPDUMP_DIR = '/tmp/tcpdump_files/'
-TCPDUMP_FILE = 'tcpdump_file-testcase' 
+
+
 SPACE = ' '
-START_TCPDUMP = '/usr/bin/sudo /usr/sbin/tcpdump -evpni eth1 tcp port 179 -w' \
-    + SPACE + TCPDUMP_DIR + TCPDUMP_FILE
 START_ROUTEM = '/home/mcladmin/cisco-routem/routem -i -f ' \
     + '/home/mcladmin/cisco-routem/routem.cfg'
 EXIT = 'exit'
@@ -20,22 +19,6 @@ SHELL_PROMPT = '\$ '
 ROUTEM_PROMPT = 'bgp0\>'
 SUDO_PROMPT = '[sudo] password for mcladmin: '
 TIMEOUT = 2
-SHOWRUN_RE = compile('#bgp_[0-9](.*)#bgp_[0-9]', DOTALL)
-SUDO_RE = compile('\[sudo\] password for mcladmin:', DOTALL)
-CONNECT = 'connect'
-USER = 'user'
-HOST = 'host'
-PWD = 'pwd'
-
-def create_pexpect_obj(cmd, user, host, pwd):
-    connect = cmd + SPACE + user + '@' + host
-    try:
-        pObj = pexpect.spawn(connect)
-    except OSError, e:                                                                                          
-        raise
-    pObj.expect('password:')
-    pObj.sendline(pwd)
-    return pObj
 
 class Routem:
     """ A class for sending commands to Routem
@@ -43,6 +26,11 @@ class Routem:
     Attributes:
         self.cmd - list of commands to send
         self.result - results expected
+        
+        May need the below list of pre-compiled regular expressions, some
+        indexes as constants would help too, i.e. index for SHOWRUN_RE = 0
+
+        self.reList
 
     Methods:
         __init__ - constructor
@@ -51,27 +39,11 @@ class Routem:
     """
 
     def __init__(self, params):
-        self.tcpdump = create_pexpect_obj(params(CONNECT), params(USER),
-                                          params(HOST), params(PWD))
-        self.routem = create_pexpect_obj(params(CONNECT), params(USER),
-                                          params(HOST), params(PWD))
+        self.routem = create_pexpect_obj(params[CONNECT], params[USER],
+                                         params[HOST], params[PWD])
 
     def execute(self):
-        print 'starting TCPDump code'
-        self.tcpdump.sendline(START_TCPDUMP)
-        sudoMatchIndex = self.tcpdump.expect_list([SUDO_RE], TIMEOUT, 500)
-        if sudoMatchIndex == 0:
-            print 'got sudo prompt:  {0}'.format(self.tcpdump.match.group(0))
-            self.tcpdump.sendline(PASSWORD)
-        else:
-            print "didn't find match"
-            self.tcpdump.close()
-            sys.exit('sudo prompt problems!!')
-
         print 'starting routem code'
-        self.routem = spawn(CONNECT)
-        self.routem.expect('password:')
-        self.routem.sendline(PASSWORD)
         self.routem.expect(SHELL_PROMPT)
         self.routem.sendline(START_ROUTEM)
         self.routem.expect(ROUTEM_PROMPT, TIMEOUT)
@@ -89,10 +61,3 @@ class Routem:
         self.routem.close()
         print 'finishing routem code'
         
-        # wait some time for BGP to run a bit
-        time.wait(5)
-        self.tcpdump.sendintr()
-        self.tcpdump.expect(SHELL_PROMPT)
-        self.tcpdump.sendline(EXIT)
-        self.tcpdump.close()
-        print 'finishing tcpdump code'

@@ -2,8 +2,10 @@
 
 from tcpdumplib import Tcpdump
 from constants import *
+from time import sleep 
+from routemlib import Routem
 
-params = {
+tcpdumpParams = {
             CONNECT:  '/usr/bin/ssh',
             USER:  'mcladmin',
             HOST:  '216.69.72.141',
@@ -11,8 +13,11 @@ params = {
             WAIT:  5
          }
 
-dump = Tcpdump(params)
-
-dump.execute()
+dump = Tcpdump(tcpdumpParams)
+route = Routem(tcpdumpParams)
+dump.start()
+route.execute()
+sleep(5)
+dump.stop()
 
 

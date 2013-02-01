@@ -1,7 +1,7 @@
 #!/usr/bin/env /usr/bin/python2.7
 
 import sys
-from time import time
+from time import sleep
 from datetime import datetime
 import pexpect
 from utilities import create_pexpect_obj 
@@ -53,9 +53,12 @@ class Tcpdump:
         else:
             stamp = datetime.today().strftime("%Y%m%d.%H:%M:%S")
         self.dumpfile = TCPDUMP_DIR + TCPDUMP_FILE + stamp
+        print self.dumpfile
+        print START_TCPDUMP + SPACE + self.dumpfile
 
-    def execute(self):
-        print 'starting TCPDump code'
+    def start(self):
+        print 'starting tcpdump'
+        self.tcpdump.sendline("if [ ! -d " + TCPDUMP_DIR + " ]; then mkdir -p " + TCPDUMP_DIR + "; fi")
         self.tcpdump.sendline(START_TCPDUMP + SPACE + self.dumpfile)
         sudoMatchIndex = self.tcpdump.expect_list([SUDO_RE], TIMEOUT, 500)
         if sudoMatchIndex == 0:
@@ -66,10 +69,10 @@ class Tcpdump:
             self.tcpdump.close()
             sys.exit('sudo prompt problems!!')
 
-        # wait some time for BGP to run a bit
-        time.wait(self.wait)
+    def stop(self):
         self.tcpdump.sendintr()
         self.tcpdump.expect(SHELL_PROMPT)
         self.tcpdump.sendline(EXIT)
         self.tcpdump.close()
-        print 'finishing tcpdump code'
+        print 'stopped tcpdump'
+
