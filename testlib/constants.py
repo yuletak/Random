@@ -8,6 +8,8 @@ PWD = 'pwd'
 TCID = 'tcid'
 TRID = 'trid'
 WAIT = 'wait'
+TDMPPARAM = 'tdmpparam'
+RTMPARAM = 'rtmparam'
 
 TCPDUMP_DIR = '/tmp/tcpdump_files/'
 TCPDUMP_FILE = 'tcpdump_file-testcase' 
