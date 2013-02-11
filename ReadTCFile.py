@@ -10,13 +10,16 @@ f = open('/home/hadmin/CODE/GIT/Random/testcases/moduleA/tc-00-00-01', 'r')
 lines = f.read()
 mystr = ''
 for line in lines:
-    line = line.lstrip('\t')
-    mystr = mystr + line.rstrip('\n')
+    mystr = mystr + line.strip(' \t\n')
 
 f.close()
 
-print 'mystr:  {0}'.format(mystr)
+print 'processed mystr:  {0}'.format(mystr)
+
+#mystr = '{TCID:"00-00-01",CONNECT:"/usr/bin/ssh",USER:"mcladmin",HOST:"216.69.72.141",PWD:"xyz123",WAIT:5}'
+
+#print 'raw mystr:  {0}'.format(mystr)
 
 params = eval(mystr)
 
-print params[0]
+print params[TDMPPARAM][CONNECT]
