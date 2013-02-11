@@ -5,7 +5,18 @@ from testlib.tcpdumplib import Tcpdump
 from testlib.routemlib import Routem
 from time import sleep 
 
-params = execfile('/home/yui/CODE/github/Random/testcases/moduleA/tc-00-00-01')
+f = open('/home/hadmin/CODE/GIT/Random/testcases/moduleA/tc-00-00-01', 'r')
 
-print params
+lines = f.read()
+mystr = ''
+for line in lines:
+    line = line.lstrip('\t')
+    mystr = mystr + line.rstrip('\n')
 
+f.close()
+
+print 'mystr:  {0}'.format(mystr)
+
+params = eval(mystr)
+
+print params[0]
