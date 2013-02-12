@@ -14,12 +14,13 @@ for line in lines:
 
 f.close()
 
-print 'processed mystr:  {0}'.format(mystr)
-
-#mystr = '{TCID:"00-00-01",CONNECT:"/usr/bin/ssh",USER:"mcladmin",HOST:"216.69.72.141",PWD:"xyz123",WAIT:5}'
-
-#print 'raw mystr:  {0}'.format(mystr)
-
 params = eval(mystr)
 
-print params[TDMPPARAM][CONNECT]
+dump = Tcpdump(params[TDMPPARAM])
+
+dump.start()
+
+sleep(5)
+
+dump.stop()
+
