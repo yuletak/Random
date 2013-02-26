@@ -1,0 +1,12 @@
+{
+    TCID: 'at-01304',
+    PARAM: {
+        INPUT: [ 
+            '/usr/bin/ssh',
+        ],
+        OUTPUT: [
+            'I am test case at-01304'
+        ] 
+    },
+}
+
