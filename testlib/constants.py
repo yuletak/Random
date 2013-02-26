@@ -10,8 +10,11 @@ TRID = 'trid'
 WAIT = 'wait'
 TDMPPARAM = 'tdmpparam'
 RTMPARAM = 'rtmparam'
+INPUT = 'input'
+OUTPUT = 'output'
 
 TCPDUMP_DIR = '/tmp/tcpdump_files/'
+
 TCPDUMP_FILE = 'tcpdump_file-testcase' 
 SPACE = ' '
 START_TCPDUMP = '/usr/bin/sudo /usr/sbin/tcpdump -evpni eth1 tcp port 179 -w' \
