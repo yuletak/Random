@@ -38,9 +38,9 @@ class Routem:
         execute - send commands and check results
     """
 
-    def __init__(self, params):
-        self.routem = create_pexpect_obj(params[CONNECT], params[USER],
-                                         params[HOST], params[PWD])
+    def __init__(self, rtmparam, tdmpparam):
+        self.routem = create_pexpect_obj(rtmparam[CONNECT], rtmparam[USER],
+                                         rtmparam[HOST], rtmparam[PWD])
 
     def execute(self):
         print 'starting routem code'
