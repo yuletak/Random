@@ -8,12 +8,11 @@ from utilities import create_pexpect_obj
 from constants import *
 from re import compile, DOTALL
 
-SUDO_RE = compile('\[sudo\] password for mcladmin:', DOTALL)
 
 TCPDUMP_DIR = '/tmp/tcpdump_files/'
 TCPDUMP_FILE = 'tcpdump_file-' 
 SPACE = ' '
-START_TCPDUMP = '/usr/bin/sudo /usr/sbin/tcpdump -evpni eth1 tcp port 179 -w' 
+START_TCPDUMP = '/usr/bin/sudo /usr/sbin/tcpdump -evpni IFACE tcp port 179 -w FILE' 
 
 class Tcpdump:
     """ A class for starting and stopping tcpdump
@@ -37,35 +36,47 @@ class Tcpdump:
             TRID - test run ID
             TCID - test case ID
 
-        execute - send commands and check results
+        start - start tcpdump
+
+        stop - stop tcpdump
+
     """
 
     def __init__(self, params):
         self.tcpdump = create_pexpect_obj(params[CONNECT], params[USER],
                                           params[HOST], params[PWD])
-        if WAIT in params:
-            self.wait = params[WAIT]
-        else:
-            self.wait = 5
+
+        try:
+            self.user = params[USER]
+            self.pwd = params[PWD]
+            self.SUDO_RE = compile('\[sudo\] password for '+self.user+':', DOTALL)
+        except KeyError:
+            raise
 
         if TRID and TCID in params:
             stamp = 'trid' + params[TRID] + '.' + 'tcid' + params[TCID]
         else:
             stamp = datetime.today().strftime("%Y%m%d.%H:%M:%S")
         self.dumpfile = TCPDUMP_DIR + TCPDUMP_FILE + stamp
-        print self.dumpfile
-        print START_TCPDUMP + SPACE + self.dumpfile
+
+        try:
+            self.dumpCmd = START_TCPDUMP
+            self.dumpCmd = self.dumpCmd.replace('IFACE', params[IFACE])
+        except KeyError:
+            raise
+
+        self.dumpCmd = self.dumpCmd.replace('FILE', self.dumpfile)
 
     def start(self):
-        print 'starting tcpdump'
-        self.tcpdump.sendline("if [ ! -d " + TCPDUMP_DIR + " ]; then mkdir -p " + TCPDUMP_DIR + "; fi")
-        self.tcpdump.sendline(START_TCPDUMP + SPACE + self.dumpfile)
-        sudoMatchIndex = self.tcpdump.expect_list([SUDO_RE], TIMEOUT, 500)
+        # Check for existence of directory to store tcpdump files
+        # Create directory if necessary.
+        self.tcpdump.sendline("if [ ! -d " + TCPDUMP_DIR + " ]; " \
+            "then mkdir -p " + TCPDUMP_DIR + "; fi")
+        self.tcpdump.sendline(self.dumpCmd)
+        sudoMatchIndex = self.tcpdump.expect_list([self.SUDO_RE], TIMEOUT, 500)
         if sudoMatchIndex == 0:
-            print 'got sudo prompt:  {0}'.format(self.tcpdump.match.group(0))
-            self.tcpdump.sendline(PASSWORD)
+            self.tcpdump.sendline(self.pwd)
         else:
-            print "didn't find match"
             self.tcpdump.close()
             sys.exit('sudo prompt problems!!')
 
@@ -74,5 +85,3 @@ class Tcpdump:
         self.tcpdump.expect(SHELL_PROMPT)
         self.tcpdump.sendline(EXIT)
         self.tcpdump.close()
-        print 'stopped tcpdump'
-

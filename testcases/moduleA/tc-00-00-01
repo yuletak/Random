@@ -1,18 +1,18 @@
-  "{
-    TCID : '00-00-01',
+{
+    TCID : "00-00-01",
     TDMPPARAM : {
-        CONNECT:  '/usr/bin/ssh',
-        USER:  'mcladmin',
-        HOST:  '216.69.72.141',
-        PWD:  'xyz123',
+        CONNECT:  "/usr/bin/ssh",
+        USER:  "hadmin",
+        HOST:  "192.168.1.109",
+        IFACE:  "eth0",
+        PWD:  "xyz123",
         WAIT:  5
     },
     RTMPARAM : {
-        CONNECT:  '/usr/bin/ssh',
-        USER:  'mcladmin',
-        HOST:  '216.69.72.141',
-        PWD:  'xyz123',
+        CONNECT:  "/usr/bin/ssh",
+        USER:  "mcladmin",
+        HOST:  "216.69.72.141",
+        PWD:  "xyz123",
         WAIT:  5
-    }"
-
-
+    }
+}
