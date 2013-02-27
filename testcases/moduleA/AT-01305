@@ -1,0 +1,12 @@
+{
+    TCID: 'at-01305',
+    PARAM: {
+        INPUT: [ 
+            '/usr/bin/ssh',
+        ],
+        OUTPUT: [
+            'hello world!'
+        ] 
+    },
+}
+
