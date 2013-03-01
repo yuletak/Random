@@ -1,8 +1,8 @@
 {
-    TCID: 'at-01305',
+    TCID: 'AT-01305',
     PARAM: {
         INPUT: [ 
-            '/usr/bin/ssh',
+            'input AT-01305',
         ],
         OUTPUT: [
             'hello world!'
