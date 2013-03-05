@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
+from sys import path as path, argv as argv
 # should be a better way to include the library code path
 path += ['./testlib']
 
-from sys import path as path, argv as argv
 from utilities import parse_jenkins_argv as pja
 from utilities import get_testcase_param as gtp
 from utilities import get_vo_req as gvr
@@ -25,14 +25,20 @@ except error:
 
 for test in VOTestAssets.findall('Asset'):
     # Get test case file name; called "Number" in VO
-    tcFile = ''
+    fileName = ''
+    scopeName = '' 
     for attrib in test.findall('Attribute'):
         name = attrib.get('name')
+#        print 'attribute and value:  {0}:{1}'.format(name, attrib.text)
         if name == 'Number':
-            tcFile = attrib.text
+            fileName = attrib.text
+        if name == 'Scope.Name':
+            scopeName = attrib.text
+        if fileName != '' and scopeName != '':
             break
-    if tcFile == '':
+    if fileName == '' or scopeName == '':
         raise
+    tcFile = TESTCASEDIR + scopeName + '/' + fileName
     tcInput = gtp(tcFile)
     tcParam = tcInput[PARAM]
     testcase = Testcase(tcParam)
