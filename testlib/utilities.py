@@ -40,10 +40,10 @@ def get_vo_req(USER, PWD, URL):
     req.add_header("Authorization", "Basic %s" % base64string)
     return req
 
-def get_testcase_param(testcase):
-    if testcase == None:
+def get_testcase_param(tcFile):
+    if tcFile == None:
         raise
-    f = open('./testcases/moduleA/' + testcase, 'r')
+    f = open(tcFile, 'r')
     lines = f.read()
     mystr = ''
     for line in lines:
