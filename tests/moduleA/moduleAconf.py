@@ -17,4 +17,4 @@ VOTEST = VOREST + '/Test'
 
 VOTESTS = VOTEST + '?where=Timebox=\'Timebox:' + VOTIMEBOX + '\''
 
-TESTCASEDIR = '../testcases/moduleA/'
+TESTCASEDIR = './testcases/'
