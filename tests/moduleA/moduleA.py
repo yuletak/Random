@@ -7,6 +7,8 @@ path += ['./testlib']
 from utilities import parse_jenkins_argv as pja
 from utilities import get_testcase_param as gtp
 from utilities import get_vo_req as gvr
+from utilities import update_vo_attrib as uva
+
 from constants import * 
 from moduleAconf import *
 import urllib2, base64
@@ -29,7 +31,6 @@ for test in VOTestAssets.findall('Asset'):
     scopeName = '' 
     for attrib in test.findall('Attribute'):
         name = attrib.get('name')
-#        print 'attribute and value:  {0}:{1}'.format(name, attrib.text)
         if name == 'Number':
             fileName = attrib.text
         if name == 'Scope.Name':
@@ -42,8 +43,11 @@ for test in VOTestAssets.findall('Asset'):
     tcInput = gtp(tcFile)
     tcParam = tcInput[PARAM]
     testcase = Testcase(tcParam)
-    code, mesg = testcase.execute()
-    print '{0}:  {1}'.format(code, mesg)
+    code, status, mesg = testcase.execute()
+    results = (('Attribute', 'Status.Name', status),
+               ('Attribute', 'ActualResults', mesg),
+               ('Attribute', 'ExpectedResults', tcParam[OUTPUT][0]),)
 
     # update the info in VO
-
+    asset = uva(results)
+    print asset
