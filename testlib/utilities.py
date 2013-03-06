@@ -31,7 +31,7 @@ def parse_jenkins_argv(args):
             var[JGITCOMMIT] = args[index+1]
         if args[index] == '-branch':
             var[JGITBRANCH] = args[index+1]
-        index += 1
+        index += 2
     return var 
 
 def get_vo_req(USER, PWD, URL):
@@ -40,6 +40,13 @@ def get_vo_req(USER, PWD, URL):
     req.add_header("Authorization", "Basic %s" % base64string)
     return req
 
+def update_vo_attrib(nameValues):
+    asset = '<Asset>'
+    for element,name,value in nameValues:
+        asset = asset + '<' + element + SPACE + 'name=' + '"' + name + '"' + \
+        SPACE + 'act="set">' + value + '</' + element + '>'
+    return asset
+ 
 def get_testcase_param(tcFile):
     if tcFile == None:
         raise
