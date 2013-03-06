@@ -26,7 +26,7 @@ class Testcase:
 
     def execute(self):
         if self.output[0] == 'blah':
-            return [0, 'PASS']
+            return [0, 'PASS', '']
         else:
-            return [1, 'FAIL, "{0}" doesn\'t match expected output "blah"'.format(self.output[0])]
+            return [1, 'FAIL', '"{0}" doesn\'t match expected output "blah"'.format(self.output[0])]
 
