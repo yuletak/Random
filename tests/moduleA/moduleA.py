@@ -4,10 +4,8 @@ from sys import path as path, argv as argv
 # should be a better way to include the library code path
 path += ['./testlib']
 
-from utilities import parse_jenkins_argv as pja
-from utilities import get_testcase_param as gtp
-from utilities import get_vo_req as gvr
 from utilities import update_vo_attrib as uva
+from utilities import *
 
 from constants import * 
 from moduleAconf import *
@@ -16,32 +14,27 @@ import xml.etree.ElementTree as ET
 from testcase import Testcase
 
 jEnv = {}
-jEnv = pja(argv)
+jEnv = parse_jenkins_argv(argv)
 
-VOTestReq = gvr(VOUSER, VOPWD, VOTESTS)
+VOTestReq = get_vo_req(VOUSER, VOPWD, VOTESTS)
 try:
     VOTests = urllib2.urlopen(VOTestReq)
     VOTestAssets = ET.fromstring(VOTests.read())
 except error:
     print 'nada!'
 
-for test in VOTestAssets.findall('Asset'):
-    # Get test case file name; called "Number" in VO
-    fileName = ''
-    scopeName = '' 
-    for attrib in test.findall('Attribute'):
-        name = attrib.get('name')
-        if name == 'Number':
-            fileName = attrib.text
-        if name == 'Scope.Name':
-            scopeName = attrib.text
-        if fileName != '' and scopeName != '':
-            break
-    if fileName == '' or scopeName == '':
-        raise
+testcases = get_vo_testcases(VOTestAssets)
+for testID, fileName, scopeName in testcases:
+
+    # Set path to file and file name
     tcFile = TESTCASEDIR + scopeName + '/' + fileName
-    tcInput = gtp(tcFile)
-    tcParam = tcInput[PARAM]
+
+    # Read file parameters and get test case parameters
+    tcFileParam = get_testcase_param(tcFile)
+    tcParam = tcFileParam[PARAM]
+
+    # Create the dummy testcase object, can be any of the objects we have
+    # Typically should be a list of objects with list of commands to execute
     testcase = Testcase(tcParam)
     code, status, mesg = testcase.execute()
     results = (('Attribute', 'Status.Name', status),
@@ -49,5 +42,14 @@ for test in VOTestAssets.findall('Asset'):
                ('Attribute', 'ExpectedResults', tcParam[OUTPUT][0]),)
 
     # update the info in VO
-    asset = uva(results)
-    print asset
+    asset = update_vo_attrib(results)
+    VOOneTestURL = VOTEST + '/' + testID 
+    print 'VersionOne one test URL:  {0}'.format(VOOneTestURL)
+
+    # update the info in VO
+    asset = update_vo_attrib(results)
+    print '  attributes to update:  {0}'.format(asset)
+
+    VOOneTestReq = get_vo_req(VOUSER, VOPWD, VOOneTestURL, asset)
+    VOOneTest = urllib2.urlopen(VOOneTestReq)
+    print VOOneTest.read()
