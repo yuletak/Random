@@ -2,7 +2,7 @@
 
 from pexpect import spawn   
 from constants import *
-import urllib2, base64
+import urllib2, urllib, base64
 
 def create_pexpect_obj(cmd, user, host, pwd):
     connect = cmd + SPACE + user + '@' + host
@@ -34,17 +34,47 @@ def parse_jenkins_argv(args):
         index += 2
     return var 
 
-def get_vo_req(USER, PWD, URL):
-    base64string = base64.standard_b64encode('%s:%s' % (USER, PWD))
-    req = urllib2.Request(URL)
+def get_vo_req(user, pwd, VOurl, text = None):
+    base64string = base64.standard_b64encode('%s:%s' % (user, pwd))
+    if text != None:
+        text = urllib.urlencode(text) 
+    req = urllib2.Request(url = VOurl, data = text)
+
     req.add_header("Authorization", "Basic %s" % base64string)
     return req
+
+def get_vo_testcases(assets):
+    ''' Retrieve test case ID and module from assets list
+
+    Input:  list of test case assets as returned by VersionOne
+    Output:  list of tuples which indicate test case number and scope name
+    '''
+    testcases = []
+    for test in assets.findall('Asset'):
+        # Get test case file name; called "Number" in VO
+        fileName = ''
+        scopeName = ''
+        testID = test.get('id').strip('"').split(':')[1]
+        
+        for attrib in test.findall('Attribute'):
+            name = attrib.get('name')
+            if name == 'Number':
+                fileName = attrib.text
+            if name == 'Scope.Name':
+                scopeName = attrib.text
+            if testID != '' and fileName != '' and scopeName != '':
+                testcases.append((testID, fileName, scopeName))
+                break
+        if testID == '' or fileName == '' or scopeName == '':
+            raise
+    return testcases
 
 def update_vo_attrib(nameValues):
     asset = '<Asset>'
     for element,name,value in nameValues:
         asset = asset + '<' + element + SPACE + 'name=' + '"' + name + '"' + \
         SPACE + 'act="set">' + value + '</' + element + '>'
+    asset = asset + '</Asset>'
     return asset
  
 def get_testcase_param(tcFile):
