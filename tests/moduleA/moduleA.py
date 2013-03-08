@@ -4,7 +4,6 @@ from sys import path as path, argv as argv
 # should be a better way to include the library code path
 path += ['./testlib']
 
-from utilities import update_vo_attrib as uva
 from utilities import *
 
 from constants import * 
@@ -37,18 +36,22 @@ for testID, fileName, scopeName in testcases:
     # Typically should be a list of objects with list of commands to execute
     testcase = Testcase(tcParam)
     code, status, mesg = testcase.execute()
-    results = (('Attribute', 'Status.Name', status),
-               ('Attribute', 'ActualResults', mesg),
+    Status = ''
+    if code == 0:
+        Status = '"TestStatus:129"'
+    else:
+        Status = '"TestStatus:155"'
+        
+    results = (('Attribute', 'ActualResults', mesg),
+               ('Relation', 'Status', Status),
                ('Attribute', 'ExpectedResults', tcParam[OUTPUT][0]),)
 
     # update the info in VO
-    asset = update_vo_attrib(results)
+    asset = update_vo_asset(results)
+    print '  attributes to update:  {0}'.format(asset)
+
     VOOneTestURL = VOTEST + '/' + testID 
     print 'VersionOne one test URL:  {0}'.format(VOOneTestURL)
-
-    # update the info in VO
-    asset = update_vo_attrib(results)
-    print '  attributes to update:  {0}'.format(asset)
 
     VOOneTestReq = get_vo_req(VOUSER, VOPWD, VOOneTestURL, asset)
     VOOneTest = urllib2.urlopen(VOOneTestReq)
