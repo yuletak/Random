@@ -36,8 +36,6 @@ def parse_jenkins_argv(args):
 
 def get_vo_req(user, pwd, VOurl, text = None):
     base64string = base64.standard_b64encode('%s:%s' % (user, pwd))
-    if text != None:
-        text = urllib.urlencode(text) 
     req = urllib2.Request(url = VOurl, data = text)
 
     req.add_header("Authorization", "Basic %s" % base64string)
@@ -69,11 +67,22 @@ def get_vo_testcases(assets):
             raise
     return testcases
 
-def update_vo_attrib(nameValues):
+QUOTE = '"'
+LBRKTOPEN = '<'
+LBRKTCLOSE = '</'
+RBRKTOPEN = '>'
+RBRKTCLOSE = '/>'
+ACTSET = 'act="set"'
+NAME = 'name='
+
+def update_vo_asset(nameValues):
     asset = '<Asset>'
     for element,name,value in nameValues:
-        asset = asset + '<' + element + SPACE + 'name=' + '"' + name + '"' + \
-        SPACE + 'act="set">' + value + '</' + element + '>'
+        if element == 'Attribute':
+            asset = asset + '<Attribute name="' + name + '" act="set">' + value + '</Attribute>'
+        if element == 'Relation':
+            asset = asset + '<Relation name="' + name + '" act="set"><Asset idref=' \
+            + value + '/></Relation>'
     asset = asset + '</Asset>'
     return asset
  
